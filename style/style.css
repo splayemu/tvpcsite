@@ -1,0 +1,154 @@
+html, body, div, span, applet, object, iframe,  h1, h2, h3, h4, h5, h6, p, blockquote, pre,  a, abbr, acronym, address, big, cite, code,  del, dfn, em, font, img, ins, kbd, q, s, samp,  small, strike, strong, sub, sup, tt, var,  dl, dt, dd, ol, ul, li,  fieldset, form, label, legend,  table, caption, tbody, tfoot, thead, tr, th, td{
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    color:wheat;
+    font-weight:inherit;
+    font-style:inherit;
+    font-size:100%;
+    font-family:inherit;
+    vertical-align:baseline;
+}
+ 
+/* remember to define focus styles! */
+:focus{
+    outline:0;
+}
+
+html {
+    height: 100%;
+}
+ 
+body {
+    text-align: center;
+    min-width: 740px;
+    padding: 0;
+    margin: 0;
+    background-color: black;
+    height: 100%;
+}
+ 
+h1, h2, h3, h4, h5, h6{
+    font-style:inherit;
+    font-size:2em;
+    font-family:inherit;
+}
+ 
+ol, ul{
+    list-style:none;
+}
+ 
+/* tables still need 'cellspacing="0"' in the markup */
+table{
+    border-collapse:separate;
+    border-spacing:0;
+}
+ 
+caption, th, td{
+    text-align: left;
+    font-weight: normal;
+}
+ 
+blockquote:before, blockquote:after,  q:before, q:after{
+    content: "";
+}
+ 
+blockquote, q{
+    quotes: "" "";
+}
+
+#wrapper {
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+#svgLeft {
+    float: left;
+    width: 14%;
+    margin: 0;
+}
+
+#svgLeft .inner {
+    padding-top: 1px;
+    margin: 0 10px 10px 10px;
+}
+
+#svgRight {
+    float: right;
+    width: 14%;
+    margin: 0;
+}
+
+#svgRight .inner {
+    padding-top: 1px;
+    margin: 0 10px 10px 10px;
+}
+
+
+#logo {
+    width: 100%;
+}
+
+#logo .inner{
+    margin-left: 14%;
+    margin-right: 14%;
+    padding: 1% 13%;
+    
+}
+
+#content {
+    margin-left: 14%;
+    margin-right: 14%;
+
+    height: auto;
+}
+
+#content .inner{
+	width: 100%;
+	margin: 0 auto;
+}
+
+
+#footer {
+    height: 50px;
+    width: 100%;
+}
+
+#footer .inner {
+    margin-left: 14%;
+    margin-right: 14%;
+    margin-top: 10px;
+}
+
+ul.tabs{
+	margin: 0px;
+	padding: 0px;
+	list-style: none;
+}
+
+ul.tabs li{
+	background: none;
+	display: inline-block;
+	padding: 10px 15px;
+	cursor: pointer;
+}
+
+ul.tabs li.current{
+	background: #1B1B1B;
+}
+
+.tab-content{
+	display: none;
+	background: #1B1B1B;
+	padding: 15px;
+}
+
+.tab-content.current{
+	display: inherit;
+}

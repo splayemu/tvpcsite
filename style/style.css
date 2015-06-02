@@ -7,7 +7,7 @@ html, body, div, span, applet, object, iframe,  h1, h2, h3, h4, h5, h6, p, block
     font-weight:inherit;
     font-style:inherit;
     font-size:100%;
-    font-family:inherit;
+    font-family:'Roboto Mono';
     vertical-align:baseline;
 }
  
@@ -31,8 +31,13 @@ body {
  
 h1, h2, h3, h4, h5, h6{
     font-style:inherit;
-    font-size:2em;
+    font-size:20px;
     font-family:inherit;
+}
+
+h1{
+    font-size:70px;
+    font-weight: bold;
 }
  
 ol, ul{
@@ -58,8 +63,14 @@ blockquote, q{
     quotes: "" "";
 }
 
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%;
+}
+
+
 #wrapper {
-    text-align: left;
     margin-left: auto;
     margin-right: auto;
     padding: 0;
@@ -114,6 +125,11 @@ blockquote, q{
 	margin: 0 auto;
 }
 
+#bioContent {
+    text-align: left;
+    max-width: 700px;
+}
+
 
 #footer {
     height: 50px;
@@ -124,31 +140,4 @@ blockquote, q{
     margin-left: 14%;
     margin-right: 14%;
     margin-top: 10px;
-}
-
-ul.tabs{
-	margin: 0px;
-	padding: 0px;
-	list-style: none;
-}
-
-ul.tabs li{
-	background: none;
-	display: inline-block;
-	padding: 10px 15px;
-	cursor: pointer;
-}
-
-ul.tabs li.current{
-	background: #1B1B1B;
-}
-
-.tab-content{
-	display: none;
-	background: #1B1B1B;
-	padding: 15px;
-}
-
-.tab-content.current{
-	display: inherit;
 }

@@ -97,9 +97,14 @@ h1{
 
 #player {
     height: 100%;
-    min-height: 600px;
     margin-bottom: 10px;
 
+}
+
+circle {
+    fill: black;
+    stroke: white;
+    stroke-width: 3px;
 }
 
 #content .inner{

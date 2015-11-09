@@ -3,40 +3,60 @@
 <head>	
 	<title>TVPC</title>
 	<link rel="stylesheet" type="text/css" href="style/style.css">
+    <script type="text/javascript" src="lib/d3.min.js"></script>
+    <script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
+    <script type="text/javascript" src="src/tvpcvis.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Mono&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
 <script>
-    (function() {
-        var script = document.createElement("script");
+    // doesn't work on local
+    //(function() {
+    //    var script = document.createElement("script");
 
-        script.type = "text/javascript";
-        script.async = true;
-        script.src = "//sd.toneden.io/production/v2/toneden.loader.js"
+    //    script.type = "text/javascript";
+    //    script.async = true;
+    //    script.src = "//sd.toneden.io/production/v2/toneden.loader.js"
 
-        var entry = document.getElementsByTagName("script")[0];
-        entry.parentNode.insertBefore(script, entry);
-    }());
+    //    var entry = document.getElementsByTagName("script")[0];
+    //    entry.parentNode.insertBefore(script, entry);
+    //}());
 
-    ToneDenReady = window.ToneDenReady || [];
-    ToneDenReady.push(function() {
-        ToneDen.configure({
-            soundcloudConsumerKey: '3bfa6c4e7c64be439b555750443fcab7'
-        });
-        ToneDen.player.create({
-            dom: "#player",
-            skin: "dark",
-            // makes a bottom bar player
-            mini: false,
-            shrink: true,
-            urls: [
-                "https://soundcloud.com/tvpc"
-            ]
-        });
-    });
+    //ToneDenReady = window.ToneDenReady || [];
+    //ToneDenReady.push(function() {
+    //    ToneDen.configure({
+    //        soundcloudConsumerKey: '3bfa6c4e7c64be439b555750443fcab7'
+    //    });
+    //    ToneDen.player.create({
+    //        dom: "#player",
+    //        skin: "dark",
+    //        // makes a bottom bar player
+    //        mini: false,
+    //        shrink: true,
+    //        urls: [
+    //            "https://soundcloud.com/tvpc"
+    //        ]
+    //    });
+    //});
 </script>
 </head>
 <body>
 <div id="wrapper">
     <div id="svgLeft">           
+            <a href="https://www.facebook.com/tvpc408" class="svg"> 
+                <object class="socialIcon" type="image/svg+xml" data="res/fb.svg"></object>
+            </a>
+            
+            <a href="https://instagram.com/tvpc_music/" class="svg">
+                <object class="socialIcon" type="image/svg+xml" data="res/instagram.svg"></object>
+            </a>
+            <a href="https://soundcloud.com/tvpc" class="svg">
+                <object class="socialIcon" id="soundcloud" type="image/svg+xml" data="res/soundcloud.svg"></object>
+            </a>
+            <a href="https://twitter.com/tvpc_production" class="svg">
+                <object class="socialIcon" id="twitter" type="image/svg+xml" data="res/twitter.svg"></object>
+            </a>
+            <a href="https://www.youtube.com/channel/UC3Z-Ehhp7fe0d8IY90byrvQ" class="svg">
+                <object class="socialIcon" id="youtube" type="image/svg+xml" data="res/youtube.svg"></object>
+            </a>
     </div>
     <div id="svgRight">     
     </div>
@@ -60,25 +80,8 @@
         </div>
     </div>
     <div id="content">
+        <svg id="vis" width="800px" height="600px"></svg>
 	    <div id="player"></div>
-        <div id="icons"> 
-            <a href="https://www.facebook.com/tvpc408" class="svg"> 
-                <object class="socialIcon" type="image/svg+xml" data="res/fb.svg"></object>
-            </a>
-            
-            <a href="https://instagram.com/tvpc_music/" class="svg">
-                <object class="socialIcon" type="image/svg+xml" data="res/instagram.svg"></object>
-            </a>
-            <a href="https://soundcloud.com/tvpc" class="svg">
-                <object class="socialIcon" id="soundcloud" type="image/svg+xml" data="res/soundcloud.svg"></object>
-            </a>
-            <a href="https://twitter.com/tvpc_production" class="svg">
-                <object class="socialIcon" id="twitter" type="image/svg+xml" data="res/twitter.svg"></object>
-            </a>
-            <a href="https://www.youtube.com/channel/UC3Z-Ehhp7fe0d8IY90byrvQ" class="svg">
-                <object class="socialIcon" id="youtube" type="image/svg+xml" data="res/youtube.svg"></object>
-            </a>
-        </div>
     </div>
 </div>
 </body>

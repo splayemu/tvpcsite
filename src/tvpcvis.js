@@ -48,14 +48,11 @@ var calculateScales = function calculateScalesF (tracks) {
     // minCircleSize should be calculated based on the size of the stroke-width
     // maxCircleSize should be calculated based on the size of the viewbox
     // buffer is maxCircleSize + stroke-width
-    var minCircleSize = 4,
-        maxCircleSize = 20,
+    var width = 1200,
+        height = 600,
+        minCircleSize = 4,
+        maxCircleSize = 15,
         buffer = maxCircleSize + 4;
-
-    var vis = d3.select('#vis')
-
-    var rect = vis.node().getBoundingClientRect();
-    console.log(rect);
 
     var xValues = new Scale();
     var yValues = new Scale();
@@ -73,11 +70,11 @@ var calculateScales = function calculateScalesF (tracks) {
 
     var xScale = d3.time.scale()
         .domain(xValues.getMinMax())
-        .range([buffer, rect['width'] - buffer]);
+        .range([buffer, width - buffer]);
 
     var yScale = d3.scale.linear()
         .domain(yValues.getMinMax())
-        .range([buffer, rect['height'] - buffer]);
+        .range([buffer, height - buffer]);
 
     var rScale = d3.scale.log()
         .domain(rValues.getMinMax())
@@ -87,10 +84,20 @@ var calculateScales = function calculateScalesF (tracks) {
 }
 
 function drawSongs(tracks) {
+    // create the svg with a 2x1 aspect ratio (echoed in CSS)
+    var svg = d3.select('div#content')
+        .append('div')
+        .classed('svg-container', true)
+        .classed('inner', true)
+        .append('svg')
+        .attr('preserveAspectRatio', 'xMinYMin meet')
+        .attr('viewBox', '0 0 1200 600')
+        .classed('svg-content-responsive', true);
 
     var scales = calculateScales(tracks);
     console.log('drawing tracks');
-    var circle = d3.select("#vis").selectAll("circle")
+
+    var circle = svg.selectAll("circle")
         .data(tracks)
         .enter().append("circle")
         .attr("cx", function(d) { return scales[0](d.created_at); })

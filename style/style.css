@@ -89,26 +89,33 @@ h1{
 }
 
 #content {
-    margin-left: 14%;
-    margin-right: 14%;
+    margin-left: 20%;
+    margin-right: 20%;
 
     height: auto;
+    padding: 1% 6%;
 }
 
-#vis {
-    height: 100%;
+.svg-container {
+    display: inline-block;
+    position: relative;
     width: 100%;
+    padding-bottom: 50%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 circle {
     fill: black;
     stroke: white;
     stroke-width: 3px;
-}
-
-#content .inner{
-	width: 100%;
-	margin: 0 auto;
 }
 
 .socialIcon {

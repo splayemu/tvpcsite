@@ -61,8 +61,7 @@ h1{
 }
 
 #svgLeft .inner {
-    padding-top: 1px;
-    margin: 0 10px 10px 10px;
+    padding-top: 10%;
 }
 
 #svgRight {
@@ -72,8 +71,7 @@ h1{
 }
 
 #svgRight .inner {
-    padding-top: 1px;
-    margin: 0 10px 10px 10px;
+    padding-top: 10%;
 }
 
 
@@ -123,9 +121,10 @@ circle {
 }
 
 a.svg {
+    margin: auto;
     position: relative;
-    display: inline-block;
-    width: 5%;
+    display: block;
+    width: 12%;
 }
 
 a.svg:after {

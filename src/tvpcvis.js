@@ -111,25 +111,29 @@ function testVis() {
     fakeTracks[0] = {
         'duration': 5000,
         'created_at': new Date(300000),
-        'favoritings_count': 5
+        'favoritings_count': 5,
+        'title': 'Fun'
     };
 
     fakeTracks[1] = {
         'duration': 3000,
         'created_at': new Date(600000),
-        'favoritings_count': 100
+        'favoritings_count': 100,
+        'title': 'superFun'
     };
 
     fakeTracks[2] = {
         'duration': 1000,
         'created_at': new Date(900000),
-        'favoritings_count': 5000
+        'favoritings_count': 5000,
+        'title': 'TVPCMusic'
     };
 
     fakeTracks[3] = {
         'duration': 2560,
         'created_at': new Date(105000),
-        'favoritings_count': 20000
+        'favoritings_count': 20000,
+        'title': 'TVPCMusic is super fun'
     };
 
     console.log(fakeTracks);

@@ -4,9 +4,9 @@
 	<title>TVPC</title>
 	<link rel="stylesheet" type="text/css" href="style/style.css">
     <script type="text/javascript" src="lib/d3.min.js"></script>
-    <script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
+    <!--<<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>/-->
     <script type="text/javascript" src="src/tvpcvis.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Mono&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
+    <!--<link href='http://fonts.googleapis.com/css?family=Roboto+Mono&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>/-->
 <script>
     // doesn't work on local
     //(function() {
@@ -80,9 +80,11 @@
         </div>
     </div>
     <div id="content">
-        <svg id="vis" width="800px" height="600px"></svg>
-	    <div id="player"></div>
+        <svg id="vis"></svg>
     </div>
+</div>
+<div id="footer">
+	<div id="player"></div>
 </div>
 </body>
 </html>

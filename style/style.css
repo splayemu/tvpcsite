@@ -50,7 +50,7 @@ h1{
     margin-right: auto;
     padding: 0;
     position: relative;
-    height: 100%;
+    height: calc(100% - 50px);
     width: 100%;
 }
 
@@ -82,8 +82,8 @@ h1{
 }
 
 #logo .inner{
-    margin-left: 14%;
-    margin-right: 14%;
+    margin-left: 20%;
+    margin-right: 20%;
     padding: 1% 13%;
     
 }
@@ -95,10 +95,9 @@ h1{
     height: auto;
 }
 
-#player {
+#vis {
     height: 100%;
-    margin-bottom: 10px;
-
+    width: 100%;
 }
 
 circle {
@@ -134,10 +133,5 @@ a.svg:after {
 #footer {
     height: 50px;
     width: 100%;
-}
-
-#footer .inner {
-    margin-left: 14%;
-    margin-right: 14%;
-    margin-top: 10px;
+    background: blue;
 }

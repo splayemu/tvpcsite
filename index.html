@@ -7,56 +7,26 @@
     <!--<<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>/-->
     <script type="text/javascript" src="src/tvpcvis.js"></script>
     <!--<link href='http://fonts.googleapis.com/css?family=Roboto+Mono&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>/-->
-<script>
-    // doesn't work on local
-    //(function() {
-    //    var script = document.createElement("script");
-
-    //    script.type = "text/javascript";
-    //    script.async = true;
-    //    script.src = "//sd.toneden.io/production/v2/toneden.loader.js"
-
-    //    var entry = document.getElementsByTagName("script")[0];
-    //    entry.parentNode.insertBefore(script, entry);
-    //}());
-
-    //ToneDenReady = window.ToneDenReady || [];
-    //ToneDenReady.push(function() {
-    //    ToneDen.configure({
-    //        soundcloudConsumerKey: '3bfa6c4e7c64be439b555750443fcab7'
-    //    });
-    //    ToneDen.player.create({
-    //        dom: "#player",
-    //        skin: "dark",
-    //        // makes a bottom bar player
-    //        mini: false,
-    //        shrink: true,
-    //        urls: [
-    //            "https://soundcloud.com/tvpc"
-    //        ]
-    //    });
-    //});
-</script>
 </head>
 <body>
 <div id="wrapper">
     <div id="svgLeft">           
         <div class="inner">
-            <a href="https://www.facebook.com/tvpc408" class="svg"> 
-                <object class="socialIcon" type="image/svg+xml" data="res/fb.svg"></object>
+            <a href="https://www.facebook.com/tvpc408" class="svgIcon hvr-grow">
+                <object class="socialIconInner" type="image/svg+xml" data="res/fb.svg"></object>
             </a>
             
-            <a href="https://instagram.com/tvpc_music/" class="svg">
-                <object class="socialIcon" type="image/svg+xml" data="res/instagram.svg"></object>
+            <a href="https://instagram.com/tvpc_music/" class="svgIcon hvr-grow">
+                <object class="socialIconInner" type="image/svg+xml" data="res/instagram.svg"></object>
             </a>
-            <a href="https://soundcloud.com/tvpc" class="svg">
-                <object class="socialIcon" id="soundcloud" type="image/svg+xml" data="res/soundcloud.svg"></object>
+            <a href="https://soundcloud.com/tvpc" class="svgIcon hvr-grow">
+                <object class="socialIconInner" id="soundcloud" type="image/svg+xml" data="res/soundcloud.svg"></object>
             </a>
-            <a href="https://twitter.com/tvpc_production" class="svg">
-                <object class="socialIcon" id="twitter" type="image/svg+xml" data="res/twitter.svg"></object>
+            <a href="https://twitter.com/tvpc_production" class="svgIcon hvr-grow">
+                <object class="socialIconInner" id="twitter" type="image/svg+xml" data="res/twitter.svg"></object>
             </a>
-            <a href="https://www.youtube.com/channel/UC3Z-Ehhp7fe0d8IY90byrvQ" class="svg">
-                <object class="socialIcon" id="youtube" type="image/svg+xml" data="res/youtube.svg"></object>
+            <a href="https://www.youtube.com/channel/UC3Z-Ehhp7fe0d8IY90byrvQ" class="svgIcon hvr-grow">
+                <object class="socialIconInner" id="youtube" type="image/svg+xml" data="res/youtube.svg"></object>
             </a>
         </div>
     </div>
@@ -85,7 +55,30 @@
     </div>
 </div>
 <div id="footer">
-	<div id="player"></div>
+	<div id="player">
+        <div id="playToggle">
+            <div class="svgIcon playerIcon hvr-grow">
+                <object class="socialIconInner" type="image/svg+xml" data="res/play.svg"></object>
+            </div>
+            <div class="svgIcon playerIcon hvr-grow hidden">
+                <object class="socialIconInner" type="image/svg+xml" data="res/pause.svg"></object>
+            </div>
+        </div>
+        <div id="prevNext">
+            <div class="svgIcon playerIcon hvr-grow">
+                <object class="socialIconInner" type="image/svg+xml" data="res/lastTrack.svg"></object>
+            </div>
+            <div class="svgIcon playerIcon hvr-grow">
+                <object class="socialIconInner" type="image/svg+xml" data="res/nextTrack.svg"></object>
+            </div>
+        </div>
+        <div id="name"></div>        
+        <div id="volume">
+            <div class="svgIcon playerIcon hvr-grow">
+                <object class="socialIconInner" type="image/svg+xml" data="res/highSound.svg"></object>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

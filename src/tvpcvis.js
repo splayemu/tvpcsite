@@ -4,16 +4,31 @@ tvpcSoundcloudID = '5035743';
 //SC.initialize({
 //    client_id: soundcloudClientID
 //});
+
 // use the soundcloud api to get TVPC song stats
 console.log('Everything seems ship shape');
 
-//SC.get('/users/' + tvpcSoundcloudID + '/tracks/')
-//  .then(function(tracks){
+//SC.get('/users/' + tvpcSoundcloudID + '/tracks/').then(function(tracks) {
 //      console.log(tracks);
-//      drawSongs(tracks);})
-//  .catch(function(error){
+//      drawSongs(tracks);
+//      playTrack(tracks[0]);
+//  }).catch(function(error) {
 //      alert('Error: ' + error.message);
 //});
+
+function playTrack(track) {
+    console.log('Streaming: ', track.title);
+    //SC.stream('/tracks/' + track.id).then(function(player){
+    //  player.play();
+    //});
+}
+
+function stopTrack(track) {
+    console.log('Stopping: ', track.title);
+    //SC.stream('/tracks/' + track.id).then(function(player){
+    //  player.stop();
+    //});
+}
 
 var popularity = function popularityF (track) {
     return track.favoritings_count;
@@ -62,7 +77,7 @@ var calculateScales = function calculateScalesF (tracks) {
         if (tracks.hasOwnProperty(i)) {
             console.log('adding', i, ":", tracks[i]);
 
-            xValues.addValue(tracks[i].created_at);
+            xValues.addValue(new Date(tracks[i].created_at));
             yValues.addValue(tracks[i].duration);
             rValues.addValue(popularity(tracks[i]));
         }
@@ -100,44 +115,136 @@ function drawSongs(tracks) {
     var circle = svg.selectAll("circle")
         .data(tracks)
         .enter().append("circle")
-        .attr("cx", function(d) { return scales[0](d.created_at); })
+        .attr("cx", function(d) { return scales[0](new Date(d.created_at)); })
         .attr("cy", function(d) { return scales[1](d.duration); })
         .attr("r", function(d) { return scales[2](popularity(d)); })
 }
+
+
+var player = (function() {
+    var my = {},
+        tracks = [],
+        currentTrack = null;
+
+    my.div = null;
+
+    // private methods
+    var getTrackNumber = function getTrackNumberF (trackID) {
+        for (var i in tracks) {
+            if (tracks.hasOwnProperty(i)) {
+                console.log('searching', i, ":", tracks[i]);
+                if (tracks[i].id === trackID)
+                    return i;
+            }
+        }
+        return null;
+    }
+
+    var displayTrack = function displayTrackF (trackNumber) {
+        var name = my.div.select('#name');
+        console.log('player::displayTrack: trackNumber', trackNumber);
+        currentTrack = trackNumber;
+        // perhaps cut off the name and add ...
+        name.html(tracks[currentTrack].title);
+    }
+
+    // public methods
+    my.init = function initF (div) {
+        // create html if want to do it that way
+        my.div = d3.select(div);
+
+        // declare event handlers for player buttons
+        var playerIcon = my.div.selectAll('.playerIcon')
+            .on('click', function (d, i) {
+                console.log(d, ' ', i);
+                console.log(d3.event);
+            });
+
+        // declare event handlers for visualization
+
+    }
+
+    my.addTracks = function addTracksF (newTracks) {
+        // extend tracks with tracks
+        Array.prototype.push.apply(tracks, newTracks)
+        console.log('player::addTracks: currentTracks', tracks);
+    }
+
+    my.next = function nextF () {
+        // stop stream of current track
+        // increment currentTrack unless its at end
+        // start stream of new track
+    }
+
+    my.prev = function prevF () {
+        // stop stream of current track
+        // decrement currentTrack unless its at beginning
+        // start stream of new track
+    }
+
+    my.play = function playF () {
+        // start stream of current track
+    }
+
+    my.stop = function stopF () {
+        // stop stream of current track
+    }
+
+    my.playTrack = function playTrackF (trackID) {
+        // stop stream of current track
+        // play certain track
+
+        console.log('player::playTrack: ', trackID);
+        var trackNumber = getTrackNumber(trackID);
+        console.log('player::playTrack: trackNumber', trackNumber);
+        displayTrack(trackNumber);
+        // start stream of new track
+    }
+
+    return my;
+}());
+
 
 function testVis() {
     var fakeTracks = [];
 
     fakeTracks[0] = {
+        'id': 0,
         'duration': 5000,
-        'created_at': new Date(300000),
+        'created_at': "2013/12/22 19:00:31 +0000",
         'favoritings_count': 5,
         'title': 'Fun'
     };
 
     fakeTracks[1] = {
+        'id': 1,
         'duration': 3000,
-        'created_at': new Date(600000),
+        'created_at': "2013/10/22 19:00:31 +0000",
         'favoritings_count': 100,
         'title': 'superFun'
     };
 
     fakeTracks[2] = {
+        'id': 2,
         'duration': 1000,
-        'created_at': new Date(900000),
+        'created_at': "2013/8/22 19:00:31 +0000",
         'favoritings_count': 5000,
         'title': 'TVPCMusic'
     };
 
     fakeTracks[3] = {
+        'id': 3,
         'duration': 2560,
-        'created_at': new Date(105000),
+        'created_at': "2013/7/22 19:00:31 +0000",
         'favoritings_count': 20000,
         'title': 'TVPCMusic is super fun'
     };
 
     console.log(fakeTracks);
     drawSongs(fakeTracks);
+    player.init('#player');
+    player.addTracks(fakeTracks);
+    player.playTrack(3);
 }
 
 document.addEventListener("DOMContentLoaded", testVis);

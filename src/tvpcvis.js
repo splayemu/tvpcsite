@@ -6,8 +6,6 @@ tvpcSoundcloudID = '5035743';
 //});
 
 // use the soundcloud api to get TVPC song stats
-console.log('Everything seems ship shape');
-
 //SC.get('/users/' + tvpcSoundcloudID + '/tracks/').then(function(tracks) {
 //      console.log(tracks);
 //      drawSongs(tracks);
@@ -16,19 +14,7 @@ console.log('Everything seems ship shape');
 //      alert('Error: ' + error.message);
 //});
 
-function playTrack(track) {
-    console.log('Streaming: ', track.title);
-    //SC.stream('/tracks/' + track.id).then(function(player){
-    //  player.play();
-    //});
-}
-
-function stopTrack(track) {
-    console.log('Stopping: ', track.title);
-    //SC.stream('/tracks/' + track.id).then(function(player){
-    //  player.stop();
-    //});
-}
+console.log('Everything seems ship shape');
 
 var popularity = function popularityF (track) {
     return track.favoritings_count;
@@ -40,13 +26,11 @@ function Scale() {
         return new Scale(minLoc, maxLoc);
     }
 
-    console.log('Scale initialized: ');
     this.minValue = null;
     this.maxValue = null;
 }
 
 Scale.prototype.addValue = function (value) {
-    console.log('addValue ' + value);
     if(this.minValue === null || this.minValue > value)
         this.minValue = value;
 
@@ -59,72 +43,190 @@ Scale.prototype.getMinMax = function () {
     return [this.minValue, this.maxValue];
 }
 
-var calculateScales = function calculateScalesF (tracks) {
-    // minCircleSize should be calculated based on the size of the stroke-width
-    // maxCircleSize should be calculated based on the size of the viewbox
-    // buffer is maxCircleSize + stroke-width
-    var width = 1200,
-        height = 600,
-        minCircleSize = 4,
-        maxCircleSize = 15,
-        buffer = maxCircleSize + 4;
+var visualization = (function() {
+    var my = {},
+        svg = null,
+        xAxis = null,
+        yAxis = null,
+        scales = null,
+        trackClicked = false,
+        xTickShown = null,
+        yTickShown = null,
+        padding = 60,
+        width = 1200,
+        height = 600;
 
-    var xValues = new Scale();
-    var yValues = new Scale();
-    var rValues = new Scale();
+    my.init = function initF () {
 
-    for (var i in tracks) {
-        if (tracks.hasOwnProperty(i)) {
-            console.log('adding', i, ":", tracks[i]);
+        svg = d3.select('div#content')
+            .append('div')
+            .classed('svg-container', true)
+            .classed('inner', true)
+            .append('svg')
+            .attr('preserveAspectRatio', 'xMinYMin meet')
+            .attr('viewBox', '0 0 ' + (width + padding * 2) + ' ' +  (height + padding * 2))
+            .classed('svg-content-responsive', true);
 
-            xValues.addValue(new Date(tracks[i].created_at));
-            yValues.addValue(tracks[i].duration);
-            rValues.addValue(popularity(tracks[i]));
-        }
+        xAxis = d3.svg.axis()
+                .orient('bottom')
+                .ticks(0);
+
+        yAxis = d3.svg.axis()
+                .orient('left')
+                .ticks(0);
+
+        // xAxis
+        svg.append('g')
+            .attr('id', 'xAxis')
+            .attr("transform", "translate(0," + (height - padding) + ")")
+            .classed('axis', true);
+
+        // yAxis
+        svg.append('g')
+            .attr('id', 'yAxis')
+            .attr("transform", "translate(" + padding + ",0)")
+            .classed('axis', true);
     }
 
-    var xScale = d3.time.scale()
-        .domain(xValues.getMinMax())
-        .range([buffer, width - buffer]);
+    my.calculateScales = function calculateScalesF (tracks) {
+        // minCircleSize should be calculated based on the size of the stroke-width
+        // maxCircleSize should be calculated based on the size of the viewbox
+        // buffer is maxCircleSize + stroke-width
+        var minCircleSize = 4,
+            maxCircleSize = 15,
+            buffer = padding + maxCircleSize + 4;
 
-    var yScale = d3.scale.linear()
-        .domain(yValues.getMinMax())
-        .range([buffer, height - buffer]);
+        var xValues = new Scale();
+        var yValues = new Scale();
+        var rValues = new Scale();
 
-    var rScale = d3.scale.log()
-        .domain(rValues.getMinMax())
-        .range([minCircleSize, maxCircleSize]);
+        for (var i in tracks) {
+            if (tracks.hasOwnProperty(i)) {
+                xValues.addValue(new Date(tracks[i].created_at));
+                yValues.addValue(tracks[i].duration);
+                rValues.addValue(popularity(tracks[i]));
+            }
+        }
 
-    return [xScale, yScale, rScale];
-}
+        var xScale = d3.time.scale()
+            .domain(xValues.getMinMax())
+            .range([buffer, width - buffer]);
 
-function drawSongs(tracks) {
-    // create the svg with a 2x1 aspect ratio (echoed in CSS)
-    var svg = d3.select('div#content')
-        .append('div')
-        .classed('svg-container', true)
-        .classed('inner', true)
-        .append('svg')
-        .attr('preserveAspectRatio', 'xMinYMin meet')
-        .attr('viewBox', '0 0 1200 600')
-        .classed('svg-content-responsive', true);
+        var yScale = d3.scale.linear()
+            .domain(yValues.getMinMax())
+            .range([buffer, height - buffer]);
 
-    var scales = calculateScales(tracks);
-    console.log('drawing tracks');
+        var rScale = d3.scale.log()
+            .domain(rValues.getMinMax())
+            .range([minCircleSize, maxCircleSize]);
 
-    var circle = svg.selectAll("circle")
-        .data(tracks)
-        .enter().append("circle")
-        .attr("cx", function(d) { return scales[0](new Date(d.created_at)); })
-        .attr("cy", function(d) { return scales[1](d.duration); })
-        .attr("r", function(d) { return scales[2](popularity(d)); })
-}
+        return [xScale, yScale, rScale];
+    }
+
+    my.addTracks = function addTracksF (tracks) {
+        console.log('visualization::addTracks:', circles);
+        scales = my.calculateScales(tracks);
+
+        // add a tick for each value specifically, but hide them
+        var xTicks = [],
+            yTicks = [];
+
+        for (var i in tracks) {
+            if (tracks.hasOwnProperty(i)) {
+                xTicks.push(new Date(tracks[i].created_at));
+                yTicks.push(tracks[i].duration);
+            }
+        }
+
+        // sort the x and y axis' and make a mapping of the trackID with the respective x and y tick positions
+        // sorts the date from least recent to most recent
+        xTicks.sort(function(a, b) {
+            // subtract the dates to get a value that is either negative, positive, or zero
+            return a - b;
+        });
+        yTicks.sort();
+
+        var trackAxesPositionMap = {};
+        for (var i in tracks) {
+            if (tracks.hasOwnProperty(i)) {
+                var axesPosition = trackAxesPositionMap[tracks[i].id] = [];
+
+                xPosition = xTicks.map(Number).indexOf(+(new Date(tracks[i].created_at)));
+                axesPosition[0] = xPosition;
+
+                console.log('xDate', new Date(tracks[i].created_at), 'xAxesPosition', xPosition);
+
+                axesPosition[1] = yTicks.indexOf(tracks[i].duration);
+            }
+        }
+
+        xAxis.scale(scales[0])
+            .tickFormat(d3.time.day)
+            .tickValues(xTicks);
+
+        var xTicks = xAxis.ticks();
+
+        d3.select('#xAxis')
+            .call(xAxis);
+
+        yAxis.scale(scales[1])
+            .tickValues(yTicks);
+
+        var yTicks = yAxis.ticks();
+
+        d3.select('#yAxis')
+            .call(yAxis);
+
+        var ticks = svg.selectAll('.tick')
+            .classed('hidden', true);
+
+        var circles = svg.selectAll('circles')
+            .data(tracks)
+            .enter().append('circle')
+            .attr("cx", function(d) { return scales[0](new Date(d.created_at)); })
+            .attr("cy", function(d) { return scales[1](d.duration); })
+            .attr("r", function(d) { return scales[2](popularity(d)); });
+
+        // declare event handlers for visualization
+        circles.on('click', function (d, i) {
+            console.log(d, i, ' was clicked');
+            console.log(d3.event);
+
+            if(xTickShown !== null) {
+                xTickShown.classed('hidden', true);
+                yTickShown.classed('hidden', true);
+            }
+
+            // clicking on an item unhides its x and y axis tick
+            var tickPosition = trackAxesPositionMap[d.id];
+
+            var domXTicks = d3.selectAll('#xAxis .tick')[0];
+            var xTickToShow = domXTicks[tickPosition[0]];
+            xTickShown = d3.select(xTickToShow)
+                .classed('hidden', false);
+
+            var domYTicks = d3.selectAll('#yAxis .tick')[0];
+            var yTickToShow = domYTicks[tickPosition[1]];
+            yTickShown = d3.select(yTickToShow)
+                .classed('hidden', false);
+
+        });
+
+        //circles.on('mouseover', function (d, i) {
+        //    console.log(d, i, ' was moused over');
+        //    console.log(d3.event);
+        //});
+    }
+
+    return my;
+}());
 
 
 var player = (function() {
     var my = {},
         tracks = [],
-        currentTrack = null;
+        currentTrack = null,
+        isPlaying = 0;
 
     my.div = null;
 
@@ -154,14 +256,49 @@ var player = (function() {
         my.div = d3.select(div);
 
         // declare event handlers for player buttons
-        var playerIcon = my.div.selectAll('.playerIcon')
+        var playPauseIcons = my.div.select('#playToggle').selectAll('.playerIcon')
             .on('click', function (d, i) {
-                console.log(d, ' ', i);
+                console.log('Toggling play and pause');
                 console.log(d3.event);
+
+                isPlaying = (isPlaying + 1) % 2;
+                if (isPlaying) {
+                    my.play();
+                } else {
+                    my.stop();
+                }
+
+                // toggle the play and pause button
+                var playPauseIcons = my.div.select('#playToggle').selectAll('.playerIcon')
+                    .classed('hidden', function (d, i) {
+                        console.log(d, ' ', i);
+                        // buttons: 0 for play, 1 for pause
+                        // isPlaying: 1 for play, 0 for pause
+                        if(i === isPlaying)
+                            return 0;
+
+                        return 1;
+                    });
             });
 
-        // declare event handlers for visualization
+        var prevNextIcons = my.div.select('#prevNext').selectAll('.playerIcon')
+            .on('click', function (d, i) {
+                // 0 = prev, 1 = next
+                console.log('Touched previous or next', d, i);
+                console.log(d3.event);
+                if (i === 0) {
+                   my.prev();
+                } else {
+                   my.next();
+                }
+            });
 
+        var volumeIcons = my.div.select('#volume').selectAll('.playerIcon')
+            .on('click', function (d, i) {
+                // 0 = prev, 1 = next
+                console.log('Touched volume', d, i);
+                console.log(d3.event);
+            });
     }
 
     my.addTracks = function addTracksF (newTracks) {
@@ -171,34 +308,86 @@ var player = (function() {
     }
 
     my.next = function nextF () {
+        console.log('Switching to next song');
+
         // stop stream of current track
+        if (isPlaying) {
+            my.stop();
+            isPlaying = 0;
+            var wasPlaying = true;
+        }
+
         // increment currentTrack unless its at end
+        currentTrack++;
+        if (currentTrack >= tracks.length)
+            currentTrack--;
+
+        // display new track
+        displayTrack(currentTrack)
+
         // start stream of new track
+        if (wasPlaying) {
+            my.play();
+            isPlaying = 1;
+        }
     }
 
     my.prev = function prevF () {
+        console.log('Switching to prev song');
+
         // stop stream of current track
+        if (isPlaying) {
+            my.stop();
+            isPlaying = 0;
+            var wasPlaying = true;
+        }
+
         // decrement currentTrack unless its at beginning
+        currentTrack--;
+        if (currentTrack < 0)
+            currentTrack++;
+
+        // display new track
+        displayTrack(currentTrack)
+
         // start stream of new track
+        if (wasPlaying) {
+            my.play();
+            isPlaying = 1;
+        }
     }
 
     my.play = function playF () {
         // start stream of current track
+
+        console.log('Streaming: ', tracks[currentTrack].title);
+        //SC.stream('/tracks/' + track.id).then(function(player){
+        //  player.play();
+        //});
     }
 
     my.stop = function stopF () {
         // stop stream of current track
+
+        console.log('Stopping: ', tracks[currentTrack].title);
+        //SC.stream('/tracks/' + track.id).then(function(player){
+        //  player.stop();
+        //});
     }
 
     my.playTrack = function playTrackF (trackID) {
         // stop stream of current track
-        // play certain track
+        if (isPlaying)
+            my.stop();
 
+        // play certain track
         console.log('player::playTrack: ', trackID);
         var trackNumber = getTrackNumber(trackID);
         console.log('player::playTrack: trackNumber', trackNumber);
         displayTrack(trackNumber);
+
         // start stream of new track
+        my.play();
     }
 
     return my;
@@ -241,10 +430,11 @@ function testVis() {
     };
 
     console.log(fakeTracks);
-    drawSongs(fakeTracks);
     player.init('#player');
+    visualization.init();
     player.addTracks(fakeTracks);
-    player.playTrack(3);
+    visualization.addTracks(fakeTracks);
+    //player.playTrack(3);
 }
 
 document.addEventListener("DOMContentLoaded", testVis);

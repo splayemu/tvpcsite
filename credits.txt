@@ -1,0 +1,12 @@
+Icons:
+prevTrack.svg - Egor Rumyantsev
+nextTrack.svg - Egor Rumyantsev
+mute.svg - Egor Rumyantsev
+noSound.svg - Egor Rumyantsev
+medSound.svg - Egor Rumyantsev
+highSound.svg - Egor Rumyantsev
+play.svg - Egor Rumyantsev
+pause.svg - Egor Rumyantsev
+
+Hover Effects:
+grow - Ian Lunn

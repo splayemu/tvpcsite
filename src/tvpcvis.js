@@ -49,12 +49,40 @@ var visualization = (function() {
         xAxis = null,
         yAxis = null,
         scales = null,
-        trackClicked = false,
-        xTickShown = null,
-        yTickShown = null,
+        trackSelected = null,
         padding = 60,
         width = 1200,
-        height = 600;
+        height = 600,
+        attributeNameMapping = {
+            'title': 'Title',
+            'created_at': 'Date Created',
+            'duration': 'Duration'
+        };
+
+    var displayTrackInformation = function displayTrackInformationF () {
+
+        var attributes = ['title', 'created_at', 'duration'];
+        var trackValues = [];
+        for (var i in attributes) {
+            if (attributes.hasOwnProperty(i)) {
+                var attr = attributes[i];
+            }
+            if (trackSelected !== null && trackSelected.hasOwnProperty(attr)) {
+                trackValues.push(trackSelected[attr]);
+            }
+        }
+
+        var trackInformation = d3.select('#trackInformation').selectAll('p')
+            .data(trackValues)
+            .html(function (d, i) { return attributeNameMapping[attributes[i]] + ': ' + d; });
+
+        trackInformation.enter()
+            .append('p')
+            .html(function (d, i) { return attributeNameMapping[attributes[i]] + ': ' + d; });
+
+        trackInformation.exit()
+            .remove();
+    }
 
     my.init = function initF () {
 
@@ -128,41 +156,19 @@ var visualization = (function() {
         scales = my.calculateScales(tracks);
 
         // add a tick for each value specifically, but hide them
-        var xTicks = [],
-            yTicks = [];
+        var xTickValues = [],
+            yTickValues = [];
 
         for (var i in tracks) {
             if (tracks.hasOwnProperty(i)) {
-                xTicks.push(new Date(tracks[i].created_at));
-                yTicks.push(tracks[i].duration);
-            }
-        }
-
-        // sort the x and y axis' and make a mapping of the trackID with the respective x and y tick positions
-        // sorts the date from least recent to most recent
-        xTicks.sort(function(a, b) {
-            // subtract the dates to get a value that is either negative, positive, or zero
-            return a - b;
-        });
-        yTicks.sort();
-
-        var trackAxesPositionMap = {};
-        for (var i in tracks) {
-            if (tracks.hasOwnProperty(i)) {
-                var axesPosition = trackAxesPositionMap[tracks[i].id] = [];
-
-                xPosition = xTicks.map(Number).indexOf(+(new Date(tracks[i].created_at)));
-                axesPosition[0] = xPosition;
-
-                console.log('xDate', new Date(tracks[i].created_at), 'xAxesPosition', xPosition);
-
-                axesPosition[1] = yTicks.indexOf(tracks[i].duration);
+                xTickValues.push(new Date(tracks[i].created_at));
+                yTickValues.push(tracks[i].duration);
             }
         }
 
         xAxis.scale(scales[0])
             .tickFormat(d3.time.day)
-            .tickValues(xTicks);
+            .tickValues(xTickValues);
 
         var xTicks = xAxis.ticks();
 
@@ -170,7 +176,7 @@ var visualization = (function() {
             .call(xAxis);
 
         yAxis.scale(scales[1])
-            .tickValues(yTicks);
+            .tickValues(yTickValues);
 
         var yTicks = yAxis.ticks();
 
@@ -179,6 +185,26 @@ var visualization = (function() {
 
         var ticks = svg.selectAll('.tick')
             .classed('hidden', true);
+
+        // for some reason, selectAll returns the tick [] the same order as tickValues
+        // (works out really well for us)
+        var domXTicks = d3.selectAll('#xAxis .tick')[0];
+        var domYTicks = d3.selectAll('#yAxis .tick')[0];
+
+        var trackAxesPositionMap = {};
+        for (var i in tracks) {
+            if (tracks.hasOwnProperty(i)) {
+                var xPosition = xTickValues.map(Number).indexOf(+(new Date(tracks[i].created_at)));
+                var yPosition = yTickValues.indexOf(tracks[i].duration);
+
+                console.log('xAxis: value:', new Date(tracks[i].created_at), 'position:', xPosition);
+                console.log('yAxis: value:', tracks[i].duration, 'position:', yPosition);
+
+                var additionalValues = tracks[i].additionalValues = {}
+                additionalValues.xTick = domXTicks[xPosition];
+                additionalValues.yTick = domYTicks[yPosition];
+            }
+        }
 
         var circles = svg.selectAll('circles')
             .data(tracks)
@@ -192,23 +218,50 @@ var visualization = (function() {
             console.log(d, i, ' was clicked');
             console.log(d3.event);
 
-            if(xTickShown !== null) {
-                xTickShown.classed('hidden', true);
-                yTickShown.classed('hidden', true);
+            // trackSelected === null -> any circle is clicked
+                // trackSelected = true
+                // xTickShown = clickedTrack.additionalValues.xTick
+                // yTickShown = clickedTrack.additionalValues.yTick
+                // track information is shown
+
+            // trackSelected !== null -> different circle is clicked
+                // current xTickShown and yTickShown are hid
+                // xTickShown = clickedTrack.additionalValues.xTick
+                // yTickShown = clickedTrack.additionalValues.yTick
+                // track information is updated with clickedTrack
+
+            // trackSelected !== null -> same circle is clicked
+                // trackSelected = null
+                // current xTickShown and yTickShown are hid
+                // track information is hid
+
+            var sameCircleClicked = d === trackSelected;
+            if(trackSelected !== null) {
+                var xTickShown = d3.select(trackSelected.additionalValues.xTick)
+                    .classed('hidden', true);
+
+                var yTickShown = d3.select(trackSelected.additionalValues.yTick)
+                    .classed('hidden', true);
+
+                // hide track information
+
             }
 
-            // clicking on an item unhides its x and y axis tick
-            var tickPosition = trackAxesPositionMap[d.id];
+            console.log('trackSelected:', trackSelected, 'd:', d, 'd === trackSelected', d === trackSelected);
 
-            var domXTicks = d3.selectAll('#xAxis .tick')[0];
-            var xTickToShow = domXTicks[tickPosition[0]];
-            xTickShown = d3.select(xTickToShow)
-                .classed('hidden', false);
+            trackSelected = trackSelected === null || ! sameCircleClicked
+                ? d: null;
+            console.log('trackSelected:', trackSelected);
 
-            var domYTicks = d3.selectAll('#yAxis .tick')[0];
-            var yTickToShow = domYTicks[tickPosition[1]];
-            yTickShown = d3.select(yTickToShow)
-                .classed('hidden', false);
+            // new circle's ticks
+            var xTickShown = d3.select(d.additionalValues.xTick)
+                .classed('hidden', sameCircleClicked);
+
+            var yTickShown = d3.select(d.additionalValues.yTick)
+                .classed('hidden', sameCircleClicked);
+
+            // track information
+            displayTrackInformation();
 
         });
 

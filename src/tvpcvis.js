@@ -59,7 +59,7 @@ var visualization = (function() {
             'duration': 'Duration'
         };
 
-    var displayTrackInformation = function displayTrackInformationF () {
+    var updateTrackInformation = function displayTrackInformationF () {
 
         var attributes = ['title', 'created_at', 'duration'];
         var trackValues = [];
@@ -243,8 +243,6 @@ var visualization = (function() {
                 var yTickShown = d3.select(trackSelected.additionalValues.yTick)
                     .classed('hidden', true);
 
-                // hide track information
-
             }
 
             console.log('trackSelected:', trackSelected, 'd:', d, 'd === trackSelected', d === trackSelected);
@@ -260,8 +258,8 @@ var visualization = (function() {
             var yTickShown = d3.select(d.additionalValues.yTick)
                 .classed('hidden', sameCircleClicked);
 
-            // track information
-            displayTrackInformation();
+            // hide or display track information
+            updateTrackInformation();
 
         });
 

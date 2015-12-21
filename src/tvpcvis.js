@@ -1,20 +1,17 @@
 soundcloudClientID = '3bfa6c4e7c64be439b555750443fcab7';
 tvpcSoundcloudID = '5035743';
 
-//SC.initialize({
-//    client_id: soundcloudClientID
-//});
+SC.initialize({
+    client_id: soundcloudClientID
+});
 
 // use the soundcloud api to get TVPC song stats
-//SC.get('/users/' + tvpcSoundcloudID + '/tracks/').then(function(tracks) {
-//      console.log(tracks);
-//      drawSongs(tracks);
-//      playTrack(tracks[0]);
-//  }).catch(function(error) {
-//      alert('Error: ' + error.message);
-//});
-
-console.log('Everything seems ship shape');
+SC.get('/users/' + tvpcSoundcloudID + '/tracks/').then(function(tracks) {
+      visualization.init();
+      visualization.addTracks(tracks);
+  }).catch(function(error) {
+      alert('Error: ' + error.message);
+});
 
 function Scale() {
     // force new to be called
@@ -49,41 +46,67 @@ var visualization = (function() {
         trackSelected = null,
         outerWidth = 1200,
         outerHeight = 600,
-        margin = {left: 100, right: 100, top: 40, bottom: 40},
+        margin = {left: 150, right: 150, top: 40, bottom: 40},
         width = outerWidth - margin.left - margin.right,
         height = outerHeight - margin.top - margin.bottom,
         xAxisValue = 'created_at',
-        yAxisValue = 'favoritings_count',
+        yAxisValue = 'playback_count',
         rAxisValue = 'favoritings_count',
         attributeNameMapping = {
-            'title': 'Title',
-            'created_at': 'Date Created',
-            'duration': 'Duration'
+            'title': 'Title:',
+            'created_at': 'Released:',
+            'duration': 'Duration:',
+            'favoritings_count': 'Favorites:',
+            'playback_count': 'Listens:',
+            'download_count': 'Downloads:',
+        },
+        attributeFormatters = {
+            'created_at': function(dateString) { return d3.time.format("%B %e %Y")(new Date(dateString)); },
+            'duration': function(miliseconds) {
+                var seconds = Math.floor(miliseconds / 1000),
+                    minutes = Math.floor(seconds / 60),
+                    seconds = seconds % 60;
+                if (seconds < 10) seconds = '0' + seconds;
+                return minutes + ':' + seconds},
+            'favoritings_count': d3.format("s"),
         };
 
     var updateTrackInformation = function displayTrackInformationF () {
 
-        var attributes = ['title', 'created_at', 'duration'];
+        var attributes = ['title', 'created_at', 'duration', 'playback_count', 'favoritings_count', 'download_count'];
         var trackValues = [];
         for (var i in attributes) {
             if (attributes.hasOwnProperty(i)) {
                 var attr = attributes[i];
             }
             if (trackSelected !== null && trackSelected.hasOwnProperty(attr)) {
-                trackValues.push(trackSelected[attr]);
+                var attributeName = attr,
+                    attributeValue = trackSelected[attr];
+                if (attributeNameMapping.hasOwnProperty(attr))
+                    attributeName = attributeNameMapping[attr];
+                if (attributeFormatters.hasOwnProperty(attr))
+                    attributeValue = attributeFormatters[attr](attributeValue);
+
+                trackValues.push([attributeName, attributeValue]);
             }
         }
 
-        var trackInformation = d3.select('#trackInformation').selectAll('p')
+        var boundingBox = d3.select('div#content')[0][0].getBoundingClientRect();
+        var infoBox = d3.select('#trackInformation')
+            .style({'top': boundingBox.top + 'px', 'left': boundingBox.right + 'px'});
+
+        var rows = infoBox.select('tbody').selectAll('tr')
             .data(trackValues)
-            .html(function (d, i) { return attributeNameMapping[attributes[i]] + ': ' + d; });
+            .html(function (d, i) { return '<td>' + d[0] + '</td><td>' + d[1] + '</td>'; });
 
-        trackInformation.enter()
-            .append('p')
-            .html(function (d, i) { return attributeNameMapping[attributes[i]] + ': ' + d; });
+        rows.enter()
+            .append('tr')
+            .html(function (d, i) { return '<td>' + d[0] + '</td><td>' + d[1] + '</td>'; });
 
-        trackInformation.exit()
+        rows.exit()
             .remove();
+
+        infoBox.classed('hidden', !rows[0].length);
     }
 
     my.init = function initF () {
@@ -96,6 +119,7 @@ var visualization = (function() {
             .attr('preserveAspectRatio', 'xMinYMin meet')
             .attr('viewBox', '0 0 ' + outerWidth + ' ' + outerHeight)
             .classed('svg-content-responsive', true);
+
 
         xAxis = d3.svg.axis()
                 .orient('bottom')
@@ -126,12 +150,9 @@ var visualization = (function() {
     }
 
     my.calculateScales = function calculateScalesF (tracks) {
-        // minCircleSize should be calculated based on the size of the stroke-width
-        // maxCircleSize should be calculated based on the size of the viewbox
-        // buffer is maxCircleSize + stroke-width
         var minCircleSize = 4,
             maxCircleSize = 15,
-            strokeWidth = 4,
+            strokeWidth = 6,
             xBuffer = maxCircleSize + strokeWidth,
             yBuffer = maxCircleSize + strokeWidth;
 
@@ -151,7 +172,7 @@ var visualization = (function() {
             .domain(xValues.getMinMax())
             .range([xBuffer, width - xBuffer]);
 
-        var yScale = d3.scale.linear()
+        var yScale = d3.scale.log()
             .domain(yValues.getMinMax())
             .range([height - yBuffer, yBuffer]);
 
@@ -163,7 +184,6 @@ var visualization = (function() {
     }
 
     my.addTracks = function addTracksF (tracks) {
-        console.log('visualization::addTracks:', circles);
         scales = my.calculateScales(tracks);
 
         // add a tick for each value specifically, but hide them
@@ -187,6 +207,9 @@ var visualization = (function() {
             .call(xAxis);
 
         yAxis.scale(scales[1])
+            .tickFormat(function(d) {
+                var prefix = d3.formatPrefix(d);
+                return prefix.scale(d).toFixed() + prefix.symbol + " listens"; })
             .tickValues(yTickValues);
 
         var yTicks = yAxis.ticks();
@@ -208,9 +231,6 @@ var visualization = (function() {
                 var xPosition = xTickValues.map(Number).indexOf(+(new Date(tracks[i][xAxisValue])));
                 var yPosition = yTickValues.indexOf(tracks[i][yAxisValue]);
 
-                console.log('xAxis: value:', new Date(tracks[i][xAxisValue]), 'position:', xPosition);
-                console.log('yAxis: value:', tracks[i][yAxisValue], 'position:', yPosition);
-
                 var additionalValues = tracks[i].additionalValues = {}
                 additionalValues.xTick = domXTicks[xPosition];
                 additionalValues.yTick = domYTicks[yPosition];
@@ -226,26 +246,6 @@ var visualization = (function() {
 
         // declare event handlers for visualization
         circles.on('click', function (d, i) {
-            console.log(d, i, ' was clicked');
-            console.log(d3.event);
-
-            // trackSelected === null -> any circle is clicked
-                // trackSelected = true
-                // xTickShown = clickedTrack.additionalValues.xTick
-                // yTickShown = clickedTrack.additionalValues.yTick
-                // track information is shown
-
-            // trackSelected !== null -> different circle is clicked
-                // current xTickShown and yTickShown are hid
-                // xTickShown = clickedTrack.additionalValues.xTick
-                // yTickShown = clickedTrack.additionalValues.yTick
-                // track information is updated with clickedTrack
-
-            // trackSelected !== null -> same circle is clicked
-                // trackSelected = null
-                // current xTickShown and yTickShown are hid
-                // track information is hid
-
             var sameCircleClicked = d === trackSelected;
             if(trackSelected !== null) {
                 var xTickShown = d3.select(trackSelected.additionalValues.xTick)
@@ -282,179 +282,6 @@ var visualization = (function() {
 
     return my;
 }());
-
-
-var player = (function() {
-    var my = {},
-        tracks = [],
-        currentTrack = null,
-        isPlaying = 0;
-
-    my.div = null;
-
-    // private methods
-    var getTrackNumber = function getTrackNumberF (trackID) {
-        for (var i in tracks) {
-            if (tracks.hasOwnProperty(i)) {
-                console.log('searching', i, ":", tracks[i]);
-                if (tracks[i].id === trackID)
-                    return i;
-            }
-        }
-        return null;
-    }
-
-    var displayTrack = function displayTrackF (trackNumber) {
-        var name = my.div.select('#name');
-        console.log('player::displayTrack: trackNumber', trackNumber);
-        currentTrack = trackNumber;
-        // perhaps cut off the name and add ...
-        name.html(tracks[currentTrack].title);
-    }
-
-    // public methods
-    my.init = function initF (div) {
-        // create html if want to do it that way
-        my.div = d3.select(div);
-
-        // declare event handlers for player buttons
-        var playPauseIcons = my.div.select('#playToggle').selectAll('.playerIcon')
-            .on('click', function (d, i) {
-                console.log('Toggling play and pause');
-                console.log(d3.event);
-
-                isPlaying = (isPlaying + 1) % 2;
-                if (isPlaying) {
-                    my.play();
-                } else {
-                    my.stop();
-                }
-
-                // toggle the play and pause button
-                var playPauseIcons = my.div.select('#playToggle').selectAll('.playerIcon')
-                    .classed('hidden', function (d, i) {
-                        console.log(d, ' ', i);
-                        // buttons: 0 for play, 1 for pause
-                        // isPlaying: 1 for play, 0 for pause
-                        if(i === isPlaying)
-                            return 0;
-
-                        return 1;
-                    });
-            });
-
-        var prevNextIcons = my.div.select('#prevNext').selectAll('.playerIcon')
-            .on('click', function (d, i) {
-                // 0 = prev, 1 = next
-                console.log('Touched previous or next', d, i);
-                console.log(d3.event);
-                if (i === 0) {
-                   my.prev();
-                } else {
-                   my.next();
-                }
-            });
-
-        var volumeIcons = my.div.select('#volume').selectAll('.playerIcon')
-            .on('click', function (d, i) {
-                // 0 = prev, 1 = next
-                console.log('Touched volume', d, i);
-                console.log(d3.event);
-            });
-    }
-
-    my.addTracks = function addTracksF (newTracks) {
-        // extend tracks with tracks
-        Array.prototype.push.apply(tracks, newTracks)
-        console.log('player::addTracks: currentTracks', tracks);
-    }
-
-    my.next = function nextF () {
-        console.log('Switching to next song');
-
-        // stop stream of current track
-        if (isPlaying) {
-            my.stop();
-            isPlaying = 0;
-            var wasPlaying = true;
-        }
-
-        // increment currentTrack unless its at end
-        currentTrack++;
-        if (currentTrack >= tracks.length)
-            currentTrack--;
-
-        // display new track
-        displayTrack(currentTrack)
-
-        // start stream of new track
-        if (wasPlaying) {
-            my.play();
-            isPlaying = 1;
-        }
-    }
-
-    my.prev = function prevF () {
-        console.log('Switching to prev song');
-
-        // stop stream of current track
-        if (isPlaying) {
-            my.stop();
-            isPlaying = 0;
-            var wasPlaying = true;
-        }
-
-        // decrement currentTrack unless its at beginning
-        currentTrack--;
-        if (currentTrack < 0)
-            currentTrack++;
-
-        // display new track
-        displayTrack(currentTrack)
-
-        // start stream of new track
-        if (wasPlaying) {
-            my.play();
-            isPlaying = 1;
-        }
-    }
-
-    my.play = function playF () {
-        // start stream of current track
-
-        console.log('Streaming: ', tracks[currentTrack].title);
-        //SC.stream('/tracks/' + track.id).then(function(player){
-        //  player.play();
-        //});
-    }
-
-    my.stop = function stopF () {
-        // stop stream of current track
-
-        console.log('Stopping: ', tracks[currentTrack].title);
-        //SC.stream('/tracks/' + track.id).then(function(player){
-        //  player.stop();
-        //});
-    }
-
-    my.playTrack = function playTrackF (trackID) {
-        // stop stream of current track
-        if (isPlaying)
-            my.stop();
-
-        // play certain track
-        console.log('player::playTrack: ', trackID);
-        var trackNumber = getTrackNumber(trackID);
-        console.log('player::playTrack: trackNumber', trackNumber);
-        displayTrack(trackNumber);
-
-        // start stream of new track
-        my.play();
-    }
-
-    return my;
-}());
-
 
 function testVis() {
     var fakeTracks = [];
@@ -494,9 +321,7 @@ function testVis() {
     console.log(fakeTracks);
     player.init('#player');
     visualization.init();
-    player.addTracks(fakeTracks);
     visualization.addTracks(fakeTracks);
-    //player.playTrack(3);
 }
 
-document.addEventListener("DOMContentLoaded", testVis);
+//document.addEventListener("DOMContentLoaded", testVis);

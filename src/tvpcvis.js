@@ -16,10 +16,6 @@ tvpcSoundcloudID = '5035743';
 
 console.log('Everything seems ship shape');
 
-var popularity = function popularityF (track) {
-    return track.favoritings_count;
-}
-
 function Scale() {
     // force new to be called
     if (!(this instanceof Scale)) {
@@ -46,13 +42,19 @@ Scale.prototype.getMinMax = function () {
 var visualization = (function() {
     var my = {},
         svg = null,
+        viewVis = null,
         xAxis = null,
         yAxis = null,
         scales = null,
         trackSelected = null,
-        padding = 60,
-        width = 1200,
-        height = 600,
+        outerWidth = 1200,
+        outerHeight = 600,
+        margin = {left: 100, right: 100, top: 40, bottom: 40},
+        width = outerWidth - margin.left - margin.right,
+        height = outerHeight - margin.top - margin.bottom,
+        xAxisValue = 'created_at',
+        yAxisValue = 'favoritings_count',
+        rAxisValue = 'favoritings_count',
         attributeNameMapping = {
             'title': 'Title',
             'created_at': 'Date Created',
@@ -92,7 +94,7 @@ var visualization = (function() {
             .classed('inner', true)
             .append('svg')
             .attr('preserveAspectRatio', 'xMinYMin meet')
-            .attr('viewBox', '0 0 ' + (width + padding * 2) + ' ' +  (height + padding * 2))
+            .attr('viewBox', '0 0 ' + outerWidth + ' ' + outerHeight)
             .classed('svg-content-responsive', true);
 
         xAxis = d3.svg.axis()
@@ -103,16 +105,23 @@ var visualization = (function() {
                 .orient('left')
                 .ticks(0);
 
+        viewVis = svg.append('g')
+                      .attr('id', 'viewVis')
+                      .attr('width', width)
+                      .attr('height', height)
+                      .attr("transform", "translate(" + margin.left  + "," + margin.top + ")")
+
+
         // xAxis
         svg.append('g')
             .attr('id', 'xAxis')
-            .attr("transform", "translate(0," + (height - padding) + ")")
+            .attr("transform", "translate(" + margin.left + "," + (margin.top + height) + ")")
             .classed('axis', true);
 
         // yAxis
         svg.append('g')
             .attr('id', 'yAxis')
-            .attr("transform", "translate(" + padding + ",0)")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
             .classed('axis', true);
     }
 
@@ -122,7 +131,9 @@ var visualization = (function() {
         // buffer is maxCircleSize + stroke-width
         var minCircleSize = 4,
             maxCircleSize = 15,
-            buffer = padding + maxCircleSize + 4;
+            strokeWidth = 4,
+            xBuffer = maxCircleSize + strokeWidth,
+            yBuffer = maxCircleSize + strokeWidth;
 
         var xValues = new Scale();
         var yValues = new Scale();
@@ -130,19 +141,19 @@ var visualization = (function() {
 
         for (var i in tracks) {
             if (tracks.hasOwnProperty(i)) {
-                xValues.addValue(new Date(tracks[i].created_at));
-                yValues.addValue(tracks[i].duration);
-                rValues.addValue(popularity(tracks[i]));
+                xValues.addValue(new Date(tracks[i][xAxisValue]));
+                yValues.addValue(tracks[i][yAxisValue]);
+                rValues.addValue(tracks[i][rAxisValue]);
             }
         }
 
         var xScale = d3.time.scale()
             .domain(xValues.getMinMax())
-            .range([buffer, width - buffer]);
+            .range([xBuffer, width - xBuffer]);
 
         var yScale = d3.scale.linear()
             .domain(yValues.getMinMax())
-            .range([buffer, height - buffer]);
+            .range([height - yBuffer, yBuffer]);
 
         var rScale = d3.scale.log()
             .domain(rValues.getMinMax())
@@ -161,13 +172,13 @@ var visualization = (function() {
 
         for (var i in tracks) {
             if (tracks.hasOwnProperty(i)) {
-                xTickValues.push(new Date(tracks[i].created_at));
-                yTickValues.push(tracks[i].duration);
+                xTickValues.push(new Date(tracks[i][xAxisValue]));
+                yTickValues.push(tracks[i][yAxisValue]);
             }
         }
 
         xAxis.scale(scales[0])
-            .tickFormat(d3.time.day)
+            .tickFormat(d3.time.format("%B %Y"))
             .tickValues(xTickValues);
 
         var xTicks = xAxis.ticks();
@@ -194,11 +205,11 @@ var visualization = (function() {
         var trackAxesPositionMap = {};
         for (var i in tracks) {
             if (tracks.hasOwnProperty(i)) {
-                var xPosition = xTickValues.map(Number).indexOf(+(new Date(tracks[i].created_at)));
-                var yPosition = yTickValues.indexOf(tracks[i].duration);
+                var xPosition = xTickValues.map(Number).indexOf(+(new Date(tracks[i][xAxisValue])));
+                var yPosition = yTickValues.indexOf(tracks[i][yAxisValue]);
 
-                console.log('xAxis: value:', new Date(tracks[i].created_at), 'position:', xPosition);
-                console.log('yAxis: value:', tracks[i].duration, 'position:', yPosition);
+                console.log('xAxis: value:', new Date(tracks[i][xAxisValue]), 'position:', xPosition);
+                console.log('yAxis: value:', tracks[i][yAxisValue], 'position:', yPosition);
 
                 var additionalValues = tracks[i].additionalValues = {}
                 additionalValues.xTick = domXTicks[xPosition];
@@ -206,12 +217,12 @@ var visualization = (function() {
             }
         }
 
-        var circles = svg.selectAll('circles')
+        var circles = viewVis.selectAll('circles')
             .data(tracks)
             .enter().append('circle')
-            .attr("cx", function(d) { return scales[0](new Date(d.created_at)); })
-            .attr("cy", function(d) { return scales[1](d.duration); })
-            .attr("r", function(d) { return scales[2](popularity(d)); });
+            .attr("cx", function(d) { return scales[0](new Date(d[xAxisValue])); })
+            .attr("cy", function(d) { return scales[1](d[yAxisValue]); })
+            .attr("r", function(d) { return scales[2](d[rAxisValue]); });
 
         // declare event handlers for visualization
         circles.on('click', function (d, i) {

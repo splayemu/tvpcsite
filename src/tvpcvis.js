@@ -32,7 +32,6 @@ Scale.prototype.addValue = function (value) {
 }
 
 Scale.prototype.getMinMax = function () {
-    console.log('Scale::getMinMax ', this.minValue, ' ', this.maxValue);
     return [this.minValue, this.maxValue];
 }
 
@@ -92,8 +91,9 @@ var visualization = (function() {
         }
 
         var boundingBox = d3.select('div#content')[0][0].getBoundingClientRect();
+        var realY = (boundingBox.top + window.scrollY) + 'px';
         var infoBox = d3.select('#trackInformation')
-            .style({'top': boundingBox.top + 'px', 'left': boundingBox.right + 'px'});
+            .style({'top': realY, 'left': boundingBox.right + 'px'});
 
         var rows = infoBox.select('tbody').selectAll('tr')
             .data(trackValues)
@@ -120,7 +120,6 @@ var visualization = (function() {
             .attr('viewBox', '0 0 ' + outerWidth + ' ' + outerHeight)
             .classed('svg-content-responsive', true);
 
-
         xAxis = d3.svg.axis()
                 .orient('bottom')
                 .ticks(0);
@@ -133,8 +132,13 @@ var visualization = (function() {
                       .attr('id', 'viewVis')
                       .attr('width', width)
                       .attr('height', height)
-                      .attr("transform", "translate(" + margin.left  + "," + margin.top + ")")
+                      .attr("transform", "translate(" + margin.left  + "," + margin.top + ")");
 
+        viewVis.append("rect")
+            .classed("outerRect", true)
+            .attr("transform", "translate(" + 2 + "," + 2 + ")")
+            .attr("width", width - 2)
+            .attr("height", height - 2);
 
         // xAxis
         svg.append('g')
@@ -256,11 +260,8 @@ var visualization = (function() {
 
             }
 
-            console.log('trackSelected:', trackSelected, 'd:', d, 'd === trackSelected', d === trackSelected);
-
             trackSelected = trackSelected === null || ! sameCircleClicked
                 ? d: null;
-            console.log('trackSelected:', trackSelected);
 
             // new circle's ticks
             var xTickShown = d3.select(d.additionalValues.xTick)
@@ -273,55 +274,7 @@ var visualization = (function() {
             updateTrackInformation();
 
         });
-
-        //circles.on('mouseover', function (d, i) {
-        //    console.log(d, i, ' was moused over');
-        //    console.log(d3.event);
-        //});
     }
 
     return my;
 }());
-
-function testVis() {
-    var fakeTracks = [];
-
-    fakeTracks[0] = {
-        'id': 0,
-        'duration': 5000,
-        'created_at': "2013/12/22 19:00:31 +0000",
-        'favoritings_count': 5,
-        'title': 'Fun'
-    };
-
-    fakeTracks[1] = {
-        'id': 1,
-        'duration': 3000,
-        'created_at': "2013/10/22 19:00:31 +0000",
-        'favoritings_count': 100,
-        'title': 'superFun'
-    };
-
-    fakeTracks[2] = {
-        'id': 2,
-        'duration': 1000,
-        'created_at': "2013/8/22 19:00:31 +0000",
-        'favoritings_count': 5000,
-        'title': 'TVPCMusic'
-    };
-
-    fakeTracks[3] = {
-        'id': 3,
-        'duration': 2560,
-        'created_at': "2013/7/22 19:00:31 +0000",
-        'favoritings_count': 20000,
-        'title': 'TVPCMusic is super fun'
-    };
-
-    console.log(fakeTracks);
-    player.init('#player');
-    visualization.init();
-    visualization.addTracks(fakeTracks);
-}
-
-//document.addEventListener("DOMContentLoaded", testVis);

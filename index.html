@@ -7,6 +7,34 @@
     <script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
     <script type="text/javascript" src="src/tvpcvis.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto+Mono&subset=latin,cyrillic-ext' rel='stylesheet' type='text/css'>
+<script>
+    (function() {
+        var script = document.createElement("script");
+
+        script.type = "text/javascript";
+        script.async = true;
+        script.src = "//sd.toneden.io/production/v2/toneden.loader.js"
+
+        var entry = document.getElementsByTagName("script")[0];
+        entry.parentNode.insertBefore(script, entry);
+    }());
+
+    ToneDenReady = window.ToneDenReady || [];
+    ToneDenReady.push(function() {
+        ToneDen.configure({
+            soundcloudConsumerKey: '3bfa6c4e7c64be439b555750443fcab7'
+        });
+        ToneDen.player.create({
+            dom: "#player",
+            skin: "dark",
+            mini: false,
+            single: true,
+            urls: [
+                "https://soundcloud.com/tvpc"
+            ]
+        });
+    });
+</script>
 </head>
 <body>
 <div id="wrapper">

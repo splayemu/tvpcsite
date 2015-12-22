@@ -3,7 +3,7 @@ html, body, div, span, applet, object, iframe,  h1, h2, h3, h4, h5, h6, p, block
     padding:0;
     border:0;
     outline:0;
-    color:wheat;
+    color:white;
     font-weight:inherit;
     font-style:inherit;
     font-size:100%;
@@ -102,6 +102,34 @@ td{
     height: auto;
 }
 
+#player {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#trackInformation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 2px;
+    margin: 4px;
+    border: 2px solid #333;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    word-wrap: break-word;
+    max-width: 100%;
+}
+
+.outerRect {
+    fill: none;
+    stroke: #333;
+    stroke-width: 4px;
+    shape-rendering: crispEdges;
+}
+
 .svg-container {
     display: inline-block;
     position: relative;
@@ -126,16 +154,10 @@ circle {
     cursor: hand;
 }
 
-.axis line,
-.axis path {
-    stroke: white;
-    stroke-width: 3px;
-}
-
 .axis text {
     fill: white;
     font-size: 20px;
-    font-family:inherit;
+    font-family: inherit;
 }
 
 .svgIcon {
@@ -156,21 +178,6 @@ circle {
 
 .svgIconInner {
     width: 100%;
-}
-
-#trackInformation {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 2px;
-    margin: 4px;
-    border: 2px solid white;
-    border-radius: 4px;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    font-color: white;
-    font-size: 14px;
-    font-family:inherit;
 }
 
 .hidden {
